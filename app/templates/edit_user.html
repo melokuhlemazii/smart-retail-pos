@@ -1,0 +1,120 @@
+{% extends "dashboard_base.html" %}
+
+{% block sidebar_links %}
+<a href="{{ url_for('main.admin_dashboard') }}" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-lg">
+    <span class="mr-3">📊</span> Dashboard
+</a>
+<a href="{{ url_for('main.manage_users') }}" class="flex items-center px-4 py-3 text-gray-700 bg-blue-50 border-r-4 border-blue-500 font-semibold">
+    <span class="mr-3">👥</span> Manage Cashiers
+</a>
+<a href="{{ url_for('main.manage_products') }}" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-lg">
+    <span class="mr-3">📦</span> Inventory
+</a>
+<a href="#" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-lg">
+    <span class="mr-3">💰</span> Sales Reports
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="mb-8">
+        <a href="{{ url_for('main.manage_users') }}" class="text-blue-600 hover:text-blue-800 mb-4 inline-block">← Back to User Management</a>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Edit User</h1>
+        <p class="text-lg text-gray-600">Update user information for: <strong>{{ user_to_edit.name }}</strong></p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <form method="POST" novalidate class="space-y-6">
+            {{ form.hidden_tag() }}
+
+            <!-- Full Name -->
+            <div>
+                {{ form.name.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                {{ form.name(class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent", placeholder="Enter full name") }}
+                {% if form.name.errors %}
+                    <div class="text-red-500 text-sm mt-1">
+                        {% for error in form.name.errors %}<p>{{ error }}</p>{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Email Address -->
+            <div>
+                {{ form.email.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                {{ form.email(class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent", placeholder="Enter email address") }}
+                {% if form.email.errors %}
+                    <div class="text-red-500 text-sm mt-1">
+                        {% for error in form.email.errors %}<p>{{ error }}</p>{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Role -->
+            <div>
+                {{ form.role.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                {{ form.role(class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent") }}
+                {% if form.role.errors %}
+                    <div class="text-red-500 text-sm mt-1">
+                        {% for error in form.role.errors %}<p>{{ error }}</p>{% endfor %}
+                    </div>
+                {% endif %}
+                <p class="text-gray-500 text-sm mt-2">
+                    <strong>Administrator:</strong> Full access to all system features<br>
+                    <strong>Cashier:</strong> Access to sales processing and transaction history
+                </p>
+            </div>
+
+            <!-- Password Section -->
+            <div class="border-t pt-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">🔐 Change Password (Optional)</h3>
+                <p class="text-gray-600 text-sm mb-4">Leave blank to keep the current password</p>
+
+                <!-- New Password -->
+                <div>
+                    {{ form.password.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                    {{ form.password(class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent", placeholder="Enter new password (minimum 6 characters)") }}
+                    {% if form.password.errors %}
+                        <div class="text-red-500 text-sm mt-1">
+                            {% for error in form.password.errors %}<p>{{ error }}</p>{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="mt-4">
+                    {{ form.confirm_password.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                    {{ form.confirm_password(class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent", placeholder="Confirm new password") }}
+                    {% if form.confirm_password.errors %}
+                        <div class="text-red-500 text-sm mt-1">
+                            {% for error in form.confirm_password.errors %}<p>{{ error }}</p>{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex gap-4 border-t pt-6">
+                {{ form.submit(class="bg-blue-600 text-white font-semibold rounded-lg px-6 py-3 hover:bg-blue-700 transition-colors cursor-pointer") }}
+                <a href="{{ url_for('main.manage_users') }}" class="bg-gray-300 text-gray-800 font-semibold rounded-lg px-6 py-3 hover:bg-gray-400 transition-colors no-underline text-center">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- User Info Card -->
+    <div class="bg-blue-50 rounded-lg p-6 mt-8">
+        <h3 class="font-semibold text-gray-900 mb-3">User Information</h3>
+        <p class="text-gray-700"><strong>User ID:</strong> {{ user_to_edit.id }}</p>
+        <p class="text-gray-700"><strong>Email:</strong> {{ user_to_edit.email }}</p>
+        <p class="text-gray-700"><strong>Created:</strong> {{ user_to_edit.date_created.strftime('%B %d, %Y at %I:%M %p') }}</p>
+        <p class="text-gray-700"><strong>Current Role:</strong> 
+            {% if user_to_edit.role == 'admin' %}
+                <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-semibold">Administrator</span>
+            {% else %}
+                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">Cashier</span>
+            {% endif %}
+        </p>
+    </div>
+</div>
+{% endblock %}

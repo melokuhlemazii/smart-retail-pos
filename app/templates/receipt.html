@@ -1,0 +1,159 @@
+{% extends "dashboard_base.html" %}
+
+{% block sidebar_links %}
+<a href="{{ url_for('main.staff_dashboard') }}" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-lg">
+    <span class="mr-3">📊</span> Dashboard
+</a>
+<a href="{{ url_for('main.pos') }}" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-lg">
+    <span class="mr-3">🛍️</span> Point of Sale
+</a>
+<a href="{{ url_for('main.sales_history') }}" class="flex items-center px-4 py-3 text-gray-700 bg-blue-50 border-r-4 border-blue-500 font-semibold">
+    <span class="mr-3">📄</span> Sales History
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+    <div class="max-w-2xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-green-600 mb-2">✅ Sale Completed!</h1>
+            <p class="text-gray-600">Receipt #{{ transaction.id }}</p>
+        </div>
+
+        <!-- Receipt Card (Print-Friendly) -->
+        <div id="receipt-content" class="bg-white rounded-lg shadow-lg p-8 border-2 border-gray-200">
+            
+            <!-- Store Header -->
+            <div class="text-center border-b-2 border-gray-300 pb-4 mb-4">
+                <p class="text-2xl font-black text-blue-600">🛒 SMART-RETAIL POS</p>
+                <p class="text-sm text-gray-600">Point of Sale System</p>
+                <p class="text-xs text-gray-500 mt-2">Receipt Transaction</p>
+            </div>
+
+            <!-- Date/Time -->
+            <div class="text-center mb-6 border-b border-gray-300 pb-4">
+                <p class="text-sm text-gray-700">
+                    <strong>Date:</strong> {{ transaction.date_created.strftime('%Y-%m-%d') }}<br>
+                    <strong>Time:</strong> {{ transaction.date_created.strftime('%H:%M:%S') }}<br>
+                    <strong>Receipt #:</strong> {{ transaction.id }}
+                </p>
+            </div>
+
+            <!-- Cashier Info -->
+            <div class="text-center mb-6 pb-4 border-b border-gray-300">
+                <p class="text-sm text-gray-700">
+                    <strong>Cashier:</strong> {{ transaction.cashier.name }}<br>
+                    <strong>Payment:</strong> {% if transaction.payment_method == 'cash' %}💵 Cash{% else %}💳 Card{% endif %}
+                </p>
+            </div>
+
+            <!-- Items Table -->
+            <div class="mb-6">
+                <table class="w-full text-sm">
+                    <thead class="border-b-2 border-gray-300">
+                        <tr>
+                            <th class="text-left py-2 font-bold text-gray-700">Product</th>
+                            <th class="text-center py-2 font-bold text-gray-700">Qty</th>
+                            <th class="text-right py-2 font-bold text-gray-700">Price</th>
+                            <th class="text-right py-2 font-bold text-gray-700">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sale in sales %}
+                        <tr class="border-b border-gray-200">
+                            <td class="py-2 text-gray-900">
+                                <p class="font-semibold">{{ sale.product.name }}</p>
+                                <p class="text-xs text-gray-500">{{ sale.product.product_code }}</p>
+                            </td>
+                            <td class="py-2 text-center text-gray-700">{{ sale.quantity }}</td>
+                            <td class="py-2 text-right text-gray-700">R {{ "%.2f"|format(sale.unit_price) }}</td>
+                            <td class="py-2 text-right font-bold text-gray-900">R {{ "%.2f"|format(sale.line_total) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Totals -->
+            <div class="border-t-2 border-gray-300 pt-4 mb-6 space-y-2">
+                <div class="flex justify-between text-gray-700">
+                    <span>Subtotal:</span>
+                    <span>R {{ "%.2f"|format(transaction.subtotal) }}</span>
+                </div>
+                <div class="flex justify-between text-blue-600 font-semibold">
+                    <span>VAT (15%):</span>
+                    <span>R {{ "%.2f"|format(transaction.vat_amount) }}</span>
+                </div>
+                <div class="flex justify-between text-lg font-bold text-gray-900 border-t-2 border-gray-300 pt-2 mt-2">
+                    <span>Grand Total:</span>
+                    <span class="text-green-600">R {{ "%.2f"|format(transaction.grand_total) }}</span>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="text-center border-t-2 border-gray-300 pt-4 mt-6">
+                <p class="text-xs text-gray-600 mb-2">Thank you for your purchase!</p>
+                <p class="text-xs text-gray-500">{{ transaction.date_created.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                <p class="text-xs text-gray-500 mt-3">
+                    <strong>15% VAT included in price</strong>
+                </p>
+            </div>
+
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-8 flex gap-4">
+            <button onclick="printReceipt()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition">
+                🖨️ Print Receipt
+            </button>
+            <a href="{{ url_for('main.pos') }}" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition text-center">
+                🛍️ New Sale
+            </a>
+        </div>
+
+        <!-- Transaction Details -->
+        <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <h3 class="font-bold text-gray-900 mb-4">📋 Transaction Details</h3>
+            <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                    <p class="text-gray-600">Transaction ID</p>
+                    <p class="font-mono font-bold text-gray-900">{{ transaction.id }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-600">Items Sold</p>
+                    <p class="font-bold text-gray-900">{{ sales|length }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-600">Total Units</p>
+                    <p class="font-bold text-gray-900">{{ sales|sum(attribute='quantity') }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-600">Payment Method</p>
+                    <p class="font-bold text-gray-900">{% if transaction.payment_method == 'cash' %}Cash{% else %}Card{% endif %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function printReceipt() {
+        const printContent = document.getElementById('receipt-content').innerHTML;
+        const printWindow = window.open('', '', 'height=600,width=800');
+        const receiptId = '{{ transaction.id }}';
+        printWindow.document.write('<html><head><title>Receipt #' + receiptId + '</title>');
+        printWindow.document.write('<style>');
+        printWindow.document.write('body { font-family: Courier, monospace; margin: 10mm; }');
+        printWindow.document.write('table { width: 100%; border-collapse: collapse; }');
+        printWindow.document.write('th, td { padding: 5px; text-align: left; }');
+        printWindow.document.write('th { border-bottom: 1px solid #000; }');
+        printWindow.document.write('</style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write(printContent);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.print();
+    }
+</script>
+{% endblock %}

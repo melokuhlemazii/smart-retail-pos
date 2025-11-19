@@ -1,0 +1,12 @@
+possystem/venv/
+__pycache__/
+.env
+.pyc
+instance/
+*.pyc
+*.sqlite3
+
+
+
+
+

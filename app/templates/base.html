@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart-Retail POS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="font-sans">
+    <header class="fixed top-0 left-0 w-full bg-white/95 backdrop-blur-sm text-blue-600 flex items-center justify-between px-10 h-16 z-50 shadow-lg">
+        <div class="flex-1 flex items-center">
+            <h1 class="text-3xl font-black text-blue-600">🛒 Smart-Retail POS</h1>
+        </div>
+        <nav class="flex gap-8 items-center">
+            <a href="{{ url_for('auth.login') }}" class="bg-blue-600 text-white font-semibold rounded-lg px-6 py-3 no-underline shadow-sm hover:bg-blue-700 transition-colors">Login</a>
+            <a href="{{ url_for('auth.register') }}" class="bg-red-500 text-white font-semibold rounded-lg px-6 py-3 no-underline shadow-sm hover:bg-red-600 transition-colors">Register</a>
+        </nav>
+    </header>
+    <main class="mt-16">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mx-auto max-w-7xl px-4 py-4">
+                        <div class="rounded-md p-4 {% if category == 'success' %}bg-green-50 text-green-800{% elif category == 'danger' %}bg-red-50 text-red-800{% else %}bg-blue-50 text-blue-800{% endif %}">
+                            {{ message }}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block content %}
+        {% endblock %}
+    </main>
+    <footer class="bg-gray-50 text-gray-800 flex items-center justify-between px-10 h-15 mt-10">
+        <p class="m-0 font-semibold">&copy; 2025 Smart-Retail POS</p>
+        <div class="flex gap-6">
+            <a href="{{ url_for('auth.login') }}" class="text-blue-600 no-underline font-semibold px-5 py-2 rounded hover:bg-gray-100 transition-colors">Login</a>
+            <a href="{{ url_for('auth.register') }}" class="text-blue-600 no-underline font-semibold px-5 py-2 rounded hover:bg-gray-100 transition-colors">Register</a>
+        </div>
+    </footer>
+</body>
+</html>
+
+
+
+

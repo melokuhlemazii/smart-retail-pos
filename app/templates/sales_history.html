@@ -1,0 +1,157 @@
+{% extends "dashboard_base.html" %}
+
+{% block sidebar_links %}
+<a href="{{ url_for('main.staff_dashboard') }}" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-lg">
+    <span class="mr-3">📊</span> Dashboard
+</a>
+<a href="{{ url_for('main.pos') }}" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-lg">
+    <span class="mr-3">🛍️</span> Point of Sale
+</a>
+<a href="{{ url_for('main.sales_history') }}" class="flex items-center px-4 py-3 text-gray-700 bg-blue-50 border-r-4 border-blue-500 font-semibold">
+    <span class="mr-3">📄</span> Sales History
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">📊 Sales History</h1>
+            <p class="text-lg text-gray-600">View your completed transactions and receipts</p>
+        </div>
+
+        <!-- Transactions Table -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            {% if transactions.items %}
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+                        <tr>
+                            <th class="px-6 py-4 text-left font-bold">Receipt #</th>
+                            <th class="px-6 py-4 text-left font-bold">Date & Time</th>
+                            <th class="px-6 py-4 text-left font-bold">Items</th>
+                            <th class="px-6 py-4 text-right font-bold">Amount</th>
+                            <th class="px-6 py-4 text-left font-bold">Payment</th>
+                            <th class="px-6 py-4 text-center font-bold">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for transaction in transactions.items %}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4">
+                                <span class="font-bold text-blue-600 text-lg">#{{ transaction.id }}</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-gray-900 font-semibold">{{ transaction.date_created.strftime('%Y-%m-%d') }}</div>
+                                <div class="text-sm text-gray-500">{{ transaction.date_created.strftime('%H:%M:%S') }}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                    {{ transaction.sales|length }} items
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <span class="text-2xl font-bold text-green-600">R {{ "%.2f"|format(transaction.grand_total) }}</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                {% if transaction.payment_method == 'cash' %}
+                                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">💵 Cash</span>
+                                {% else %}
+                                    <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-semibold">💳 Card</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <a href="{{ url_for('main.receipt', transaction_id=transaction.id) }}" 
+                                   class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                                    🧾 View Receipt
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if transactions.pages > 1 %}
+            <div class="bg-gray-50 px-6 py-4 flex items-center justify-between border-t border-gray-200">
+                <div class="text-sm text-gray-600">
+                    Page {{ transactions.page }} of {{ transactions.pages }}
+                </div>
+                <div class="flex gap-2">
+                    {% if transactions.has_prev %}
+                    <a href="{{ url_for('main.sales_history', page=transactions.prev_num) }}" 
+                       class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                        ← Previous
+                    </a>
+                    {% endif %}
+                    
+                    {% if transactions.has_next %}
+                    <a href="{{ url_for('main.sales_history', page=transactions.next_num) }}" 
+                       class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                        Next →
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <!-- No Transactions -->
+            <div class="p-12 text-center">
+                <div class="text-6xl mb-4">📭</div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">No Transactions Yet</h3>
+                <p class="text-gray-600 mb-6">You haven't completed any sales yet.</p>
+                <a href="{{ url_for('main.pos') }}" 
+                   class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition">
+                    🛒 Go to Point of Sale
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Summary Cards -->
+        {% if transactions.total > 0 %}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+            <!-- Total Transactions -->
+            <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-600">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm">Total Transactions</p>
+                        <p class="text-3xl font-bold text-gray-900">{{ transactions.total }}</p>
+                    </div>
+                    <div class="text-4xl">📊</div>
+                </div>
+            </div>
+
+            <!-- Total Sales Value -->
+            <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm">Total Sales Value</p>
+                        <p class="text-3xl font-bold text-green-600">R {{ "%.2f"|format(transactions.items|sum(attribute='grand_total')) }}</p>
+                    </div>
+                    <div class="text-4xl">💰</div>
+                </div>
+            </div>
+
+            <!-- Total Items Sold -->
+            <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-600">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm">Total Items Sold</p>
+                        {% set total_items = 0 %}
+                        {% for trans in transactions.items %}
+                            {% set total_items = total_items + trans.sales|sum(attribute='quantity') %}
+                        {% endfor %}
+                        <p class="text-3xl font-bold text-purple-600">{{ total_items }}</p>
+                    </div>
+                    <div class="text-4xl">📦</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,215 @@
+{% extends "dashboard_base.html" %}
+
+{% block sidebar_links %}
+<a href="{{ url_for('main.admin_dashboard') }}" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-lg">
+    <span class="mr-3">📊</span> Dashboard
+</a>
+<a href="{{ url_for('main.manage_users') }}" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-lg">
+    <span class="mr-3">👥</span> Manage Cashiers
+</a>
+<a href="{{ url_for('main.manage_products') }}" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-lg">
+    <span class="mr-3">📦</span> Inventory
+</a>
+<a href="{{ url_for('main.sales_reports') }}" class="flex items-center px-4 py-3 text-gray-700 bg-blue-50 border-r-4 border-blue-500 font-semibold">
+    <span class="mr-3">💰</span> Sales Reports
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">💰 Sales Reports</h1>
+            <p class="text-gray-600">View sales analytics, transactions, and performance metrics</p>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h3 class="text-lg font-bold text-gray-900 mb-4">🔍 Filters</h3>
+            <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">Start Date:</label>
+                    <input type="date" name="start_date" value="{{ start_date }}" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">End Date:</label>
+                    <input type="date" name="end_date" value="{{ end_date }}" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">Cashier:</label>
+                    <select name="cashier_id" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                        <option value="">All Cashiers</option>
+                        {% for cashier in cashiers %}
+                        <option value="{{ cashier.id }}" {% if cashier_id == cashier.id %}selected{% endif %}>{{ cashier.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">Category:</label>
+                    <select name="category" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                        <option value="">All Categories</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                        🔍 Apply Filters
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <!-- Total Revenue -->
+            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg shadow-md p-6 border-l-4 border-green-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">Total Revenue</p>
+                        <p class="text-3xl font-bold text-green-600 mt-2">R {{ "%.2f"|format(total_revenue) }}</p>
+                    </div>
+                    <div class="text-5xl">💵</div>
+                </div>
+            </div>
+
+            <!-- Total Transactions -->
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">Transactions</p>
+                        <p class="text-3xl font-bold text-blue-600 mt-2">{{ total_transactions }}</p>
+                    </div>
+                    <div class="text-5xl">📊</div>
+                </div>
+            </div>
+
+            <!-- Total Items Sold -->
+            <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg shadow-md p-6 border-l-4 border-purple-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">Items Sold</p>
+                        <p class="text-3xl font-bold text-purple-600 mt-2">{{ total_items }}</p>
+                    </div>
+                    <div class="text-5xl">📦</div>
+                </div>
+            </div>
+
+            <!-- Total VAT -->
+            <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg shadow-md p-6 border-l-4 border-orange-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">VAT Collected</p>
+                        <p class="text-3xl font-bold text-orange-600 mt-2">R {{ "%.2f"|format(total_vat) }}</p>
+                    </div>
+                    <div class="text-5xl">🏛️</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Daily Sales Chart -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">📈 Daily Sales Trend</h3>
+                <canvas id="dailySalesChart" height="80"></canvas>
+            </div>
+
+            <!-- Category Distribution Chart -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">🍰 Sales by Category</h3>
+                <canvas id="categoryChart" height="80"></canvas>
+            </div>
+
+            <!-- Top Products Chart -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">🏆 Top Products by Quantity</h3>
+                <canvas id="productsChart" height="80"></canvas>
+            </div>
+        </div>
+
+        <!-- Transactions Table -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div class="px-6 py-4 bg-gray-800 text-white">
+                <h2 class="text-lg font-bold">📋 Transaction Details</h2>
+            </div>
+
+            {% if transactions %}
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-100 border-b-2 border-gray-300">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-sm font-bold text-gray-700">Date & Time</th>
+                            <th class="px-6 py-3 text-left text-sm font-bold text-gray-700">Cashier</th>
+                            <th class="px-6 py-3 text-left text-sm font-bold text-gray-700">Products Sold</th>
+                            <th class="px-6 py-3 text-right text-sm font-bold text-gray-700">Subtotal</th>
+                            <th class="px-6 py-3 text-right text-sm font-bold text-gray-700">VAT (15%)</th>
+                            <th class="px-6 py-3 text-right text-sm font-bold text-gray-700">Total</th>
+                            <th class="px-6 py-3 text-center text-sm font-bold text-gray-700">Method</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in transactions %}
+                        <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 text-sm text-gray-700">
+                                {{ transaction.date_created.strftime('%Y-%m-%d %H:%M:%S') }}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-900 font-medium">
+                                {{ transaction.cashier.name }}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-700">
+                                {% for sale in transaction.sales %}
+                                    <span class="block">{{ sale.product.name }} (x{{ sale.quantity }})</span>
+                                {% endfor %}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-700">
+                                R {{ "%.2f"|format(transaction.subtotal) }}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-700">
+                                R {{ "%.2f"|format(transaction.vat_amount) }}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-right font-bold text-green-600">
+                                R {{ "%.2f"|format(transaction.grand_total) }}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-center">
+                                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold">
+                                    {% if transaction.payment_method == 'cash' %}💵 Cash{% else %}💳 Card{% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="px-6 py-12 text-center">
+                <p class="text-gray-500 text-lg">📭 No transactions found for the selected filters.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/charts-config.js') }}"></script>
+
+<script>
+    const filterParams = {
+        start_date: '{{ start_date }}',
+        end_date: '{{ end_date }}',
+        cashier_id: {{ cashier_id if cashier_id else 'null' }},
+        category: '{{ selected_category }}'
+    };
+
+    // Initialize charts on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeDailySalesChart();
+        initializeCategoryChart();
+        initializeProductsChart();
+    });
+</script>
+
+{% endblock %}

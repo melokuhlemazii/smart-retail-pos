@@ -1,0 +1,151 @@
+{% extends "dashboard_base.html" %}
+
+{% block sidebar_links %}
+<a href="{{ url_for('main.staff_dashboard') }}" class="flex items-center px-4 py-3 text-gray-700 bg-blue-50 border-r-4 border-blue-500 font-semibold">
+    <span class="mr-3">📊</span> Dashboard
+</a>
+<a href="{{ url_for('main.pos') }}" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-lg">
+    <span class="mr-3">🛍️</span> Point of Sale
+</a>
+<a href="{{ url_for('main.sales_history') }}" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-lg">
+    <span class="mr-3">📄</span> Sales History
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Cashier Dashboard</h1>
+        <p class="text-lg text-gray-600">Welcome back, <span class="font-semibold text-blue-600">{{ user.name }}</span></p>
+        <p class="text-gray-500">Process sales, manage products, and track transactions</p>
+    </div>
+
+    <!-- Quick Action Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Process Sale Card -->
+        <a href="{{ url_for('main.pos') }}" class="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer group">
+            <div class="flex items-center justify-between mb-4">
+                <div class="text-4xl">🛒</div>
+                <div class="text-2xl text-blue-600 font-bold group-hover:scale-110 transition-transform">→</div>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Point of Sale</h3>
+            <p class="text-gray-600 mb-4">Process customer sales and checkout</p>
+            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                Start Sale
+            </button>
+        </a>
+
+        <!-- Sales History Card -->
+        <a href="{{ url_for('main.sales_history') }}" class="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer group">
+            <div class="flex items-center justify-between mb-4">
+                <div class="text-4xl">📊</div>
+                <div class="text-2xl text-purple-600 font-bold group-hover:scale-110 transition-transform">→</div>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Sales History</h3>
+            <p class="text-gray-600 mb-4">View your past transactions and receipts</p>
+            <button class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                View History
+            </button>
+        </a>
+
+        <!-- Quick Stats Card -->
+        <div class="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200 rounded-lg p-6">
+            <div class="text-4xl mb-4">📈</div>
+            <h3 class="text-xl font-bold text-gray-900 mb-4">Today's Summary</h3>
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Transactions:</span>
+                    <span class="font-bold text-lg text-green-600">{{ total_transactions }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Total Sales:</span>
+                    <span class="font-bold text-lg text-green-600">R {{ "%.2f"|format(total_sales) }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Items Sold:</span>
+                    <span class="font-bold text-lg text-green-600">{{ total_items }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Available Features</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Feature 1 -->
+            <div class="flex items-start space-x-4">
+                <div class="text-3xl">✅</div>
+                <div>
+                    <h4 class="font-bold text-gray-900">Quick Checkout</h4>
+                    <p class="text-gray-600 text-sm">Search products, add to cart, process payments instantly</p>
+                </div>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="flex items-start space-x-4">
+                <div class="text-3xl">✅</div>
+                <div>
+                    <h4 class="font-bold text-gray-900">Professional Receipts</h4>
+                    <p class="text-gray-600 text-sm">Generate and print professional receipts for every sale</p>
+                </div>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="flex items-start space-x-4">
+                <div class="text-3xl">✅</div>
+                <div>
+                    <h4 class="font-bold text-gray-900">Stock Validation</h4>
+                    <p class="text-gray-600 text-sm">System prevents overselling with real-time stock checks</p>
+                </div>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="flex items-start space-x-4">
+                <div class="text-3xl">✅</div>
+                <div>
+                    <h4 class="font-bold text-gray-900">Payment Methods</h4>
+                    <p class="text-gray-600 text-sm">Support cash and card payments with automatic VAT calculation</p>
+                </div>
+            </div>
+
+            <!-- Feature 5 -->
+            <div class="flex items-start space-x-4">
+                <div class="text-3xl">✅</div>
+                <div>
+                    <h4 class="font-bold text-gray-900">Transaction History</h4>
+                    <p class="text-gray-600 text-sm">Access complete history of all your sales with details</p>
+                </div>
+            </div>
+
+            <!-- Feature 6 -->
+            <div class="flex items-start space-x-4">
+                <div class="text-3xl">✅</div>
+                <div>
+                    <h4 class="font-bold text-gray-900">VAT Calculation</h4>
+                    <p class="text-gray-600 text-sm">Automatic 15% VAT calculation on all transactions</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="bg-blue-50 border-l-4 border-blue-600 rounded-lg p-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-3">🚀 Getting Started</h3>
+        <ol class="list-decimal list-inside space-y-2 text-gray-700">
+            <li>Click <strong>"Point of Sale"</strong> to start processing a new sale</li>
+            <li>Search for products or browse the catalog</li>
+            <li>Click <strong>"Add to Cart"</strong> for each item</li>
+            <li>Adjust quantities as needed in the cart</li>
+            <li>Click <strong>"Checkout"</strong> when ready</li>
+            <li>Select payment method (Cash or Card)</li>
+            <li>Complete the sale and view/print the receipt</li>
+            <li>Check <strong>"Sales History"</strong> to view your past transactions</li>
+        </ol>
+    </div>
+</div>
+{% endblock %}
+
+
+
+

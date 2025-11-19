@@ -1,0 +1,137 @@
+{% extends "dashboard_base.html" %}
+
+{% block sidebar_links %}
+<a href="{{ url_for('main.staff_dashboard') }}" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-lg">
+    <span class="mr-3">📊</span> Dashboard
+</a>
+<a href="{{ url_for('main.pos') }}" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-lg">
+    <span class="mr-3">🛍️</span> Point of Sale
+</a>
+<a href="{{ url_for('main.sales_history') }}" class="flex items-center px-4 py-3 text-gray-700 bg-blue-50 border-r-4 border-blue-500 font-semibold">
+    <span class="mr-3">📄</span> Sales History
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+    <div class="max-w-2xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">💳 Checkout</h1>
+            <p class="text-gray-600">Review your purchase and complete the sale</p>
+        </div>
+
+        <!-- Summary Card -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Order Summary</h2>
+
+            <!-- Items -->
+            <div class="border-b-2 border-gray-200 pb-6 mb-6">
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b border-gray-300">
+                        <tr>
+                            <th class="text-left py-2 px-2 font-bold text-gray-700">Product</th>
+                            <th class="text-center py-2 px-2 font-bold text-gray-700">Qty</th>
+                            <th class="text-right py-2 px-2 font-bold text-gray-700">Price</th>
+                            <th class="text-right py-2 px-2 font-bold text-gray-700">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in cart %}
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-3 px-2">
+                                <div>
+                                    <p class="font-semibold text-gray-900">{{ item.product_name }}</p>
+                                    <p class="text-xs text-gray-500">{{ item.product_code }}</p>
+                                </div>
+                            </td>
+                            <td class="py-3 px-2 text-center text-gray-700">{{ item.quantity }}</td>
+                            <td class="py-3 px-2 text-right text-gray-700">R {{ "%.2f"|format(item.unit_price) }}</td>
+                            <td class="py-3 px-2 text-right font-bold text-gray-900">R {{ "%.2f"|format(item.unit_price * item.quantity) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Totals -->
+            <div class="space-y-4 mb-8">
+                <div class="flex justify-between text-lg text-gray-700">
+                    <span>Subtotal:</span>
+                    <span class="font-semibold">R {{ "%.2f"|format(subtotal) }}</span>
+                </div>
+                <div class="flex justify-between text-lg text-blue-600 border-b-2 border-gray-200 pb-4">
+                    <span>VAT (15%):</span>
+                    <span class="font-semibold">R {{ "%.2f"|format(vat) }}</span>
+                </div>
+                <div class="flex justify-between text-3xl text-gray-900">
+                    <span class="font-bold">Grand Total:</span>
+                    <span class="font-bold text-green-600">R {{ "%.2f"|format(grand_total) }}</span>
+                </div>
+            </div>
+
+            <!-- Payment Form -->
+            <form method="POST" action="{{ url_for('main.checkout') }}" novalidate class="mb-6">
+                {{ form.hidden_tag() }}
+
+                <!-- Payment Method -->
+                <div class="mb-8">
+                    <label class="block text-gray-700 font-bold mb-4">Payment Method</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        {% for choice in form.payment_method.choices %}
+                        <div class="flex items-center">
+                            <input type="radio" id="payment_{{ choice[0] }}" name="payment_method" value="{{ choice[0] }}"
+                                   {% if form.payment_method.data == choice[0] %}checked{% endif %}
+                                   class="w-4 h-4 text-blue-600 cursor-pointer">
+                            <label for="payment_{{ choice[0] }}" class="ml-3 cursor-pointer text-gray-700 font-semibold">
+                                {% if choice[0] == 'cash' %}💵{% else %}💳{% endif %} {{ choice[1] }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% if form.payment_method.errors %}
+                    <ul class="mt-2 text-red-600 text-sm">
+                    {% for error in form.payment_method.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-4">
+                    {{ form.submit(class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-lg transition text-lg") }}
+                    <a href="{{ url_for('main.pos') }}" class="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 px-6 rounded-lg transition text-center text-lg">
+                        ← Back to POS
+                    </a>
+                </div>
+            </form>
+
+            <!-- Cashier Info -->
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-6">
+                <p class="text-sm text-gray-600">
+                    <strong>Cashier:</strong> {{ user.name }}<br>
+                    <strong>Date/Time:</strong> <span id="datetime">Loading...</span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Update date/time
+    function updateDateTime() {
+        const now = new Date();
+        document.getElementById('datetime').textContent = now.toLocaleString('en-ZA', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+</script>
+{% endblock %}

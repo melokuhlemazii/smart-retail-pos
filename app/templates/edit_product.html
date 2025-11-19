@@ -1,0 +1,153 @@
+{% extends "dashboard_base.html" %}
+
+{% block sidebar_links %}
+<a href="{{ url_for('main.admin_dashboard') }}" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-lg">
+    <span class="mr-3">📊</span> Dashboard
+</a>
+<a href="{{ url_for('main.manage_users') }}" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-lg">
+    <span class="mr-3">👥</span> Manage Cashiers
+</a>
+<a href="{{ url_for('main.manage_products') }}" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-lg">
+    <span class="mr-3">📦</span> Inventory
+</a>
+<a href="#" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-lg">
+    <span class="mr-3">💰</span> Sales Reports
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+    <div class="max-w-2xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">✏️ Edit Product</h1>
+            <p class="text-gray-600">Update product information</p>
+        </div>
+
+        <!-- Product Info Card -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8 border-l-4 border-blue-500">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div>
+                    <p class="text-gray-500 font-semibold">Product ID</p>
+                    <p class="text-gray-900 font-mono">{{ product_to_edit.id }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 font-semibold">Created Date</p>
+                    <p class="text-gray-900">{{ product_to_edit.date_created.strftime('%Y-%m-%d') }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 font-semibold">Last Updated</p>
+                    <p class="text-gray-900">{{ product_to_edit.date_updated.strftime('%Y-%m-%d') }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 font-semibold">Current Code</p>
+                    <p class="text-gray-900 font-mono">{{ product_to_edit.product_code }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <form method="POST" action="{{ url_for('main.edit_product', product_id=product_to_edit.id) }}" novalidate>
+                {{ form.hidden_tag() }}
+
+                <!-- Product Code -->
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-bold mb-2" for="product_code">
+                        Product Code
+                    </label>
+                    {% if form.product_code.errors %}
+                        {{ form.product_code(class="w-full px-4 py-2 border-2 border-red-500 rounded-lg focus:outline-none focus:border-red-600") }}
+                        <ul class="mt-2 text-red-600 text-sm">
+                        {% for error in form.product_code.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        {{ form.product_code(class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500") }}
+                    {% endif %}
+                </div>
+
+                <!-- Product Name -->
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-bold mb-2" for="name">
+                        Product Name
+                    </label>
+                    {% if form.name.errors %}
+                        {{ form.name(class="w-full px-4 py-2 border-2 border-red-500 rounded-lg focus:outline-none focus:border-red-600") }}
+                        <ul class="mt-2 text-red-600 text-sm">
+                        {% for error in form.name.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        {{ form.name(class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500") }}
+                    {% endif %}
+                </div>
+
+                <!-- Category -->
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-bold mb-2" for="category">
+                        Category
+                    </label>
+                    {% if form.category.errors %}
+                        {{ form.category(class="w-full px-4 py-2 border-2 border-red-500 rounded-lg focus:outline-none focus:border-red-600") }}
+                        <ul class="mt-2 text-red-600 text-sm">
+                        {% for error in form.category.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        {{ form.category(class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500") }}
+                    {% endif %}
+                </div>
+
+                <!-- Price -->
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-bold mb-2" for="price">
+                        Price (ZAR)
+                    </label>
+                    {% if form.price.errors %}
+                        {{ form.price(step="0.01", class="w-full px-4 py-2 border-2 border-red-500 rounded-lg focus:outline-none focus:border-red-600") }}
+                        <ul class="mt-2 text-red-600 text-sm">
+                        {% for error in form.price.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        {{ form.price(step="0.01", class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500") }}
+                    {% endif %}
+                </div>
+
+                <!-- Stock Quantity -->
+                <div class="mb-8">
+                    <label class="block text-gray-700 font-bold mb-2" for="stock_quantity">
+                        Stock Quantity
+                    </label>
+                    {% if form.stock_quantity.errors %}
+                        {{ form.stock_quantity(class="w-full px-4 py-2 border-2 border-red-500 rounded-lg focus:outline-none focus:border-red-600") }}
+                        <ul class="mt-2 text-red-600 text-sm">
+                        {% for error in form.stock_quantity.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        {{ form.stock_quantity(class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500") }}
+                    {% endif %}
+                    {% if product_to_edit.is_low_stock() %}
+                    <p class="text-red-600 text-xs mt-2 font-bold">⚠️ This product is below the 10-unit low stock threshold!</p>
+                    {% endif %}
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex gap-4">
+                    {{ form.submit(class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300") }}
+                    <a href="{{ url_for('main.manage_products') }}" class="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-4 rounded-lg transition duration-300 text-center">
+                        Back
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
