@@ -377,6 +377,6 @@ Everything is set up and ready to use. The system is:
 
 **Smart-Retail POS System**
 **v1.0 - Complete & Ready**
-**2024**
+**2025**
 
 *All documentation is comprehensive and ready. Enjoy! 🎉*
