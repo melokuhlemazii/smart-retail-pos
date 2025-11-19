@@ -1,4 +1,4 @@
-possystem/venv/
+possystem/
 __pycache__/
 .env
 .pyc
