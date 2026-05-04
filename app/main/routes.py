@@ -303,6 +303,14 @@ def delete_user(user_id):
         flash('You cannot delete your own account!', 'danger')
         return redirect(url_for('main.manage_users'))
     
+    # Check if user has associated transactions
+    from app.models import Transaction
+    transaction_count = Transaction.query.filter_by(cashier_id=user_id).count()
+    
+    if transaction_count > 0:
+        flash(f'Cannot delete user "{user_to_delete.name}" - they have {transaction_count} transaction(s) in the system. Delete transactions first or deactivate the account instead.', 'warning')
+        return redirect(url_for('main.manage_users'))
+    
     user_name = user_to_delete.name
     db.session.delete(user_to_delete)
     db.session.commit()
